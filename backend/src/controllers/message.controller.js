@@ -98,3 +98,52 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const deleteMessage = async (req, res) => {
+  const { messageId } = req.params;
+
+  try {
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    // Check if the user is the sender of the message or a participant in the chat
+    const chat = await Chat.findById(message.chatId).populate(
+      "participants",
+      "username"
+    );
+    if (
+      !chat ||
+      (!chat.participants.some(
+        (p) => p._id.toString() === req.user._id.toString()
+      ) &&
+        message.sender.toString() !== req.user._id.toString())
+    ) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this message" });
+    }
+
+    // Store message data before deletion for socket emission
+    const deletedMessageData = {
+      messageId: message._id,
+      chatId: message.chatId,
+      sender: message.sender,
+    };
+
+    await Message.findByIdAndDelete(messageId);
+
+    // Emit to all participants in the chat
+    chat.participants.forEach((participant) => {
+      const socketId = connectedUsers.get(participant._id.toString());
+      if (socketId) {
+        socketServer.to(socketId).emit("messageDeleted", deletedMessageData);
+      }
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
