@@ -16,10 +16,10 @@ const Chat = ({ onChatSelect }) => {
     }
   };
 
-  const handleChatClick = (chatId) => {
-    setSelectedChatId(chatId);
+  const handleChatClick = (chat) => {
+    setSelectedChatId(chat._id);
     if (onChatSelect) {
-      onChatSelect(chatId);
+      onChatSelect(chat._id, chat.chatName);
     }
   };
   const handlesocketLastMessage = () => {
@@ -92,7 +92,7 @@ const Chat = ({ onChatSelect }) => {
             <div key={chat._id} className="group mb-1  flex justify-center">
               <div className="w-full max-w-sm">
                 <button
-                  onClick={() => handleChatClick(chat._id)}
+                  onClick={() => handleChatClick(chat)}
                   className={`w-full p-2 text-left transition-all duration-200 ease-in-out transform hover:scale-[1.01] rounded-xl ${
                     selectedChatId === chat._id
                       ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25 border-2 border-blue-400/50"

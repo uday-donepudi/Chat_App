@@ -4,11 +4,11 @@ import instance from "../utils/axios";
 import Chat from "./Chat";
 import NewChat from "./NewChat";
 
-const SideBar = ({ onChatSelect }) => {
+const SideBar = ({ onChatSelect, isMobile = false }) => {
   const [isChat, setIsChat] = useState(true);
 
   return (
-    <>
+    <div className={`h-full ${isMobile ? "w-full" : ""} bg-white`}>
       <div className="px-2 py-1 bg-white border-b border-slate-200 shadow-sm">
         <div className="flex items-center h-12">
           <button
@@ -39,7 +39,7 @@ const SideBar = ({ onChatSelect }) => {
       ) : (
         <NewChat onChatCreated={() => setIsChat(true)} />
       )}
-    </>
+    </div>
   );
 };
 
